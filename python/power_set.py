@@ -17,3 +17,4 @@ def power_set(given_set:list)->list:
 if __name__=="__main__":
     given_set=[1,2,3]
     print(power_set(given_set))
+    
