@@ -1,5 +1,5 @@
 # Practice Questions
-I recieve daily problems from Daily Coding Problem (founders@dailycodingproblem.com) that I usually do/try to on the weekends.
+I recieve daily problems from Daily Coding Problem that I usually do/try to on the weekends.
 Along with them I will be adding certain interesting questions that I come across by myself or through some friends.
 Answers will be in:
 <ul>
@@ -8,6 +8,6 @@ Answers will be in:
 <li>C
 <li>MATLAB
 <li>BASH
-<li>HTML/CSS (If any)
+<li>HTML/CSS (If any/for fun)
 </ul>
 Order of Language Preference
