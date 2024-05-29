@@ -1,0 +1,125 @@
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <cmath>
+#include <climits>
+#include <algorithm>
+
+using namespace std;
+
+
+struct Node {
+    int x, y; // Coordinates of the node
+    int cost, heuristic; // Cost and heuristic values for A* algorithm
+    Node* parent; // Pointer to the parent node
+};
+
+// Comparator struct for comparing nodes in the priority queue based on their costs and heuristics
+struct CompareNode {
+    bool operator()(const Node* lhs, const Node* rhs) const {
+        return (lhs->cost + lhs->heuristic) > (rhs->cost + rhs->heuristic);
+    }
+};
+
+class AStar {
+private:
+    vector<vector<int>> grid; // 2D vector representing the grid with obstacles
+    vector<vector<Node>> nodes; // 2D vector of Nodes representing the nodes in the grid
+    priority_queue<Node*, vector<Node*>, CompareNode> openList; // Priority queue for open nodes
+    int start_x, start_y, end_x, end_y; // Coordinates of start and end nodes
+
+public:
+    // Constructor to initialize the AStar instance with grid and start/end coordinates
+    AStar(const vector<vector<int>>& grid, int start_x, int start_y, int end_x, int end_y) {
+        this->grid = grid;
+        this->start_x = start_x;
+        this->start_y = start_y;
+        this->end_x = end_x;
+        this->end_y = end_y;
+    }
+
+    void initializeNodes() {
+        nodes.resize(grid.size(), vector<Node>(grid[0].size())); // Resize nodes to match grid size
+        for (int i = 0; i < grid.size(); ++i) {
+            for (int j = 0; j < grid[i].size(); ++j) {
+                nodes[i][j] = Node{i, j, INT_MAX, 0, nullptr}; // Initialize each node with default values
+            }
+        }
+    }
+
+    // Heuristic function (Manhattan distance) for estimating the cost to reach the goal
+    int heuristic(int x, int y) const {
+        return abs(x - end_x) + abs(y - end_y); // Manhattan distance heuristic
+    }
+
+    // Function to check if a given coordinate is valid (within grid boundaries and not an obstacle)
+    bool isValid(int x, int y) const {
+        return x >= 0 && x < grid.size() && y >= 0 && y < grid[0].size() && grid[x][y] != 1; // Check validity of coordinates
+    }
+
+    // Function to find the path using the A* algorithm
+    void findPath() {
+        initializeNodes(); // Initialize nodes
+        Node* startNode = &nodes[start_x][start_y]; // Pointer to start node
+        startNode->cost = 0; // Initialize start node cost
+        startNode->heuristic = heuristic(start_x, start_y); // Calculate heuristic for start node
+        openList.push(startNode); // Add start node to open list
+
+        while (!openList.empty()) {
+            Node* current = openList.top(); // Get node with lowest total cost (f = g + h)
+            openList.pop(); // Remove current node from open list
+
+            if (current->x == end_x && current->y == end_y) { // Reached the end node
+                cout << "Path Found!" << endl;
+                vector<pair<int, int>> route; // Store the route coordinates
+                while (current != nullptr) {
+                    route.push_back({current->x, current->y}); // Add coordinates to route
+                    current = current->parent; // Move to parent node
+                }
+                reverse(route.begin(), route.end()); // Reverse to get correct order of route
+                for (const auto& point : route) {
+                    cout << "(" << point.first << ", " << point.second << ") "; // Output the route
+                }
+                cout << endl;
+                return;
+            }
+
+            static int dx[] = {1, -1, 0, 0}; // Delta x for neighbors
+            static int dy[] = {0, 0, 1, -1}; // Delta y for neighbors
+
+            for (int i = 0; i < 4; ++i) {
+                int newX = current->x + dx[i]; // Calculate new x coordinate for neighbor
+                int newY = current->y + dy[i]; // Calculate new y coordinate for neighbor
+
+                if (isValid(newX, newY)) { // Check if neighbor coordinates are valid
+                    Node* neighbor = &nodes[newX][newY]; // Pointer to neighbor node
+                    int newCost = current->cost + 1; // Calculate new cost for neighbor node
+
+                    if (newCost < neighbor->cost) { // If new cost is lower than neighbor's current cost
+                        neighbor->cost = newCost; // Update neighbor's cost
+                        neighbor->heuristic = heuristic(newX, newY); // Update neighbor's heuristic
+                        neighbor->parent = current; // Set neighbor's parent to current node
+                        openList.push(neighbor); // Add neighbor to open list
+                    }
+                }
+            }
+        }
+
+        cout << "No Path Found!" << endl; // Path not found
+    }
+};
+
+int main() {
+    // Define a grid with obstacles (0 for clear, 1 for obstacle)
+    vector<vector<int>> grid = {
+        {0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0},
+        {0, 0, 0, 0, 0},
+        {0, 1, 1, 1, 0},
+        {0, 0, 0, 0, 0}
+    };
+    AStar astar(grid, 0, 0, 4, 4);
+    astar.findPath();
+
+    return 0;
+}
